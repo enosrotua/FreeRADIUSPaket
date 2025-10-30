@@ -60,3 +60,53 @@ Integrasi cvlmedia (settings.json):
 Catatan Keamanan
 - Ubah password DB dan shared secret sebelum production.
 - Batasi akses 1812/1813 hanya dari IP Mikrotik.
+
+## Sinkronisasi Billing CVLMEDIA ke RADIUS
+Pengaturan  di CVLMEDIA:
+- user_auth_mode: radius
+- radius_host: localhost (atau IP RADIUS)
+- radius_user: radius
+- radius_password: radius
+- radius_database: radius
+
+Operasi CRUD yang perlu ditulis ke DB RADIUS:
+- Tambah user: insert ke radcheck (Cleartext-Password), lalu REPLACE ke radusergroup (map ke paket).
+- Edit password: update value di radcheck sesuai username.
+- Ganti paket: REPLACE radusergroup ke group paket baru.
+- Suspend: REPLACE radusergroup ke group 'isolir'.
+- Unsuspend: REPLACE radusergroup ke group paket sebelumnya.
+
+Template SQL tersedia di folder :
+- sql/groups.sql            -> definisi grup paket & isolir (Mikrotik-Rate-Limit)
+- sql/users.sql             -> tambah user & assign group
+- sql/suspend_unsuspend.sql -> suspend/unsuspend via penggantian group
+
+Catatan:
+- Sesuaikan nilai  agar konsisten dengan kebijakan bandwidth Anda.
+- Jika menggunakan Hotspot, Anda juga bisa menambah atribut reply lain sesuai kebutuhan.
+- Untuk password, CVLMEDIA harus menulis ke  dengan atribut .
+
+## Sinkronisasi Billing CVLMEDIA ke RADIUS
+Pengaturan settings.json di CVLMEDIA:
+- user_auth_mode: radius
+- radius_host: localhost (atau IP RADIUS)
+- radius_user: radius
+- radius_password: radius
+- radius_database: radius
+
+Operasi CRUD yang perlu ditulis ke DB RADIUS:
+- Tambah user: insert ke radcheck (Cleartext-Password), lalu REPLACE ke radusergroup (map ke paket).
+- Edit password: update value di radcheck sesuai username.
+- Ganti paket: REPLACE radusergroup ke group paket baru.
+- Suspend: REPLACE radusergroup ke group isolir.
+- Unsuspend: REPLACE radusergroup ke group paket sebelumnya.
+
+Template SQL tersedia di folder sql/:
+- sql/groups.sql            -> definisi grup paket & isolir (Mikrotik-Rate-Limit)
+- sql/users.sql             -> tambah user & assign group
+- sql/suspend_unsuspend.sql -> suspend/unsuspend via penggantian group
+
+Catatan:
+- Sesuaikan nilai Mikrotik-Rate-Limit agar konsisten dengan kebijakan bandwidth Anda.
+- Jika menggunakan Hotspot, Anda juga bisa menambah atribut reply lain sesuai kebutuhan.
+- Untuk password, CVLMEDIA harus menulis ke radcheck dengan atribut Cleartext-Password.
