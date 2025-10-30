@@ -1,0 +1,14 @@
+# Tambahkan tiap Mikrotik (NAS) di sini
+# Ganti 192.0.2.10 dengan IP Mikrotik Anda, dan SECRET dengan shared secret
+client mikrotik-a {
+    ipaddr = 192.0.2.10
+    secret = SECRET
+    nas_type = other
+}
+
+# Contoh kedua
+client mikrotik-b {
+    ipaddr = 192.0.2.11
+    secret = SECRET
+    nas_type = other
+}
