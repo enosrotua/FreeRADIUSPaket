@@ -1,4 +1,4 @@
-name: FreeRADIUS config check
+name: FreeRADIUS config and DB check
 
 on:
   push:
@@ -7,28 +7,51 @@ on:
     branches: [ main ]
 
 jobs:
-  lint-and-verify:
+  verify:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: radius
+        ports:
+          - 3306:3306
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install FreeRADIUS
+      - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y freeradius freeradius-mysql
+          sudo apt-get install -y freeradius freeradius-mysql mysql-client
 
-      - name: Backup default configs
+      - name: Wait for DB
         run: |
-          sudo cp -an /etc/freeradius/3.0/mods-available/sql /etc/freeradius/3.0/mods-available/sql.bak || true
-          sudo cp -an /etc/freeradius/3.0/sites-available/default /etc/freeradius/3.0/sites-available/default.bak || true
+          for i in {1..60}; do
+            mysql -h 127.0.0.1 -uroot -proot -e "SELECT 1" && break
+            sleep 2
+          done
+
+      - name: Create radius user and grant
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot -e "CREATE USER IF NOT EXISTS \"radius\"@\"%\" IDENTIFIED BY \"radius\"; GRANT ALL PRIVILEGES ON radius.* TO \"radius\"@\"%\"; FLUSH PRIVILEGES;"
+
+      - name: Import FreeRADIUS schema
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot radius < /etc/freeradius/3.0/mods-config/sql/main/mysql/schema.sql
+          mysql -h 127.0.0.1 -uroot -proot radius < /etc/freeradius/3.0/mods-config/sql/main/mysql/setup.sql || true
 
       - name: Apply repo configs
         run: |
           sudo cp -a configs/sql /etc/freeradius/3.0/mods-available/sql
+          sudo sed -i "s/^#\s*server = .*/server = \"127.0.0.1\"/" /etc/freeradius/3.0/mods-available/sql
+          sudo sed -i "s/^#\s*port = .*/port = 3306/" /etc/freeradius/3.0/mods-available/sql
+          sudo sed -i "s/^#\s*login = .*/login = \"radius\"/" /etc/freeradius/3.0/mods-available/sql
+          sudo sed -i "s/^#\s*password = .*/password = \"radius\"/" /etc/freeradius/3.0/mods-available/sql
           sudo ln -sf /etc/freeradius/3.0/mods-available/sql /etc/freeradius/3.0/mods-enabled/sql
           sudo cp -a configs/sites-default /etc/freeradius/3.0/sites-available/default
 
-      - name: Verify configuration parses
+      - name: Verify configuration parses and DB connectivity
         run: |
           sudo freeradius -Cx -lstdout
