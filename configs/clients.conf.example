@@ -12,3 +12,22 @@ client mikrotik-b {
     secret = SECRET
     nas_type = other
 }
+
+# Contoh tiga Mikrotik
+client mikrotik-a {
+    ipaddr = 10.0.0.10
+    secret = ganti_dengan_secret_kalian
+    nas_type = other
+}
+
+client mikrotik-b {
+    ipaddr = 10.0.0.11
+    secret = ganti_dengan_secret_kalian
+    nas_type = other
+}
+
+client mikrotik-c {
+    ipaddr = 10.0.0.12
+    secret = ganti_dengan_secret_kalian
+    nas_type = other
+}
