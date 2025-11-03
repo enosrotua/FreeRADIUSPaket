@@ -1,0 +1,124 @@
+# -*- text -*-
+##
+## mods-available/sql -- SQL modules (Production Configuration)
+##
+## Production-ready configuration with security best practices
+##
+
+######################################################################
+#
+#  Configuration for the SQL module
+#
+#  The database schemas and queries are located in subdirectories:
+#
+#	sql/<DB>/main/schema.sql	Schema
+#	sql/<DB>/main/queries.conf	Authorisation and Accounting queries
+#
+
+sql {
+	#
+	#  The dialect of SQL being used.
+	#
+	dialect = "mysql"
+
+	#
+	#  The driver module used to execute the queries.
+	#
+	driver = "rlm_sql_mysql"
+
+	#
+	#  Driver-specific subsections.
+	#
+	mysql {
+		# TLS encryption configuration
+		# For production, you should enable TLS and provide proper certificates
+		tls {
+			# CA certificate file (uncomment and set path)
+			# ca_file = "/etc/ssl/certs/ca-certificates.crt"
+			ca_path = "/etc/ssl/certs/"
+			
+			# Client certificate and key (uncomment if using client certificates)
+			# certificate_file = "/etc/ssl/certs/private/client.crt"
+			# private_key_file = "/etc/ssl/certs/private/client.key"
+			
+			cipher = "DHE-RSA-AES256-SHA:AES128-SHA"
+
+			# TLS settings - set to 'yes' for production
+			# Note: Set tls_required = yes only after configuring certificates
+			tls_required = no
+			tls_check_cert = no
+			tls_check_cert_cn = no
+		}
+
+		# Retrieve and log additional warnings from the server
+		warnings = auto
+	}
+
+	# Connection info:
+	# These values will be replaced by install script or environment variables
+	server = "localhost"
+	port = 3306
+	login = "radius"
+	password = "radius"
+	radius_db = "radius"
+
+	# Accounting tables
+	acct_table1 = "radacct"
+	acct_table2 = "radacct"
+
+	# Post-authentication table
+	postauth_table = "radpostauth"
+
+	# Tables containing 'check' items
+	authcheck_table = "radcheck"
+	groupcheck_table = "radgroupcheck"
+
+	# Tables containing 'reply' items
+	authreply_table = "radreply"
+	groupreply_table = "radgroupreply"
+
+	# Table to keep group info
+	usergroup_table = "radusergroup"
+
+	# Remove stale session if checkrad does not see a double login
+	delete_stale_sessions = yes
+
+	# Connection pool configuration for performance
+	pool {
+		# Connections to create during module instantiation
+		start = ${thread[pool].start_servers}
+
+		# Minimum number of connections to keep open
+		min = ${thread[pool].min_spare_servers}
+
+		# Maximum number of connections
+		max = ${thread[pool].max_servers}
+
+		# Spare connections to be left idle
+		spare = ${thread[pool].max_spare_servers}
+
+		# Number of uses before the connection is closed (0 = infinite)
+		uses = 0
+
+		# Wait time after connection failure (seconds)
+		retry_delay = 30
+
+		# Connection lifetime (0 = infinite)
+		lifetime = 0
+
+		# Idle timeout (seconds)
+		idle_timeout = 60
+	}
+
+	# Table to keep radius client info (optional)
+	# Uncomment to read clients from database instead of clients.conf
+	# read_clients = yes
+	# client_table = "nas"
+
+	# Group attribute for this SQL instance
+	group_attribute = "SQL-Group"
+
+	# Read database-specific queries
+	$INCLUDE ${modconfdir}/${.:name}/main/${dialect}/queries.conf
+}
+

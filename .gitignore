@@ -1,0 +1,40 @@
+# Credentials & Secrets
+/root/.freeradius_credentials
+/root/.freeradius_billing_credentials
+*.credentials
+*.secret
+.env
+.env.local
+
+# Backup files
+/var/backups/freeradius/
+*.sql.gz
+*.tar.gz
+*_backup_*
+
+# OS files
+.DS_Store
+Thumbs.db
+*~
+
+# Editor files
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log
+*.cache
+
+# Local configuration (jangan commit config production)
+/etc/freeradius/3.0/clients.conf
+/etc/freeradius/3.0/users
+configs/clients.conf
+
+# Test files
+test_*
+*_test.*
+temp/
+
