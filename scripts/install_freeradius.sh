@@ -41,7 +41,17 @@ if [[ -z "$MARIADB_ROOT_PASSWORD" ]]; then
 fi
 
 echo -e "${GREEN}[*] Updating package list...${NC}"
-apt-get update -y
+# Update package list, continue even if some repositories fail
+if ! apt-get update -y 2>&1; then
+    echo -e "${YELLOW}[!] Some repository errors detected (may be old/invalid repos)${NC}"
+    echo -e "${YELLOW}[!] This is usually non-critical, continuing installation...${NC}"
+    # Remove invalid repository references
+    if grep -q "impish-security" /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null; then
+        echo -e "${YELLOW}[!] Attempting to fix invalid repository references...${NC}"
+        sed -i '/impish-security/d' /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
+        echo -e "${GREEN}[+] Removed invalid repository references${NC}"
+    fi
+fi
 
 echo -e "${GREEN}[*] Installing packages...${NC}"
 apt-get install -y \
