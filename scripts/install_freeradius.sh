@@ -41,17 +41,23 @@ if [[ -z "$MARIADB_ROOT_PASSWORD" ]]; then
 fi
 
 echo -e "${GREEN}[*] Updating package list...${NC}"
-# Update package list, continue even if some repositories fail
-if ! apt-get update -y 2>&1; then
+# Remove invalid repository references first (impish-security is old Ubuntu version)
+if grep -q "impish-security" /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null; then
+    echo -e "${YELLOW}[!] Found invalid repository references, removing...${NC}"
+    sed -i '/impish-security/d' /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
+    echo -e "${GREEN}[+] Removed invalid repository references${NC}"
+fi
+
+# Update package list (continue even if some repositories fail)
+apt-get update -y 2>&1 | tee /tmp/apt_update.log || {
     echo -e "${YELLOW}[!] Some repository errors detected (may be old/invalid repos)${NC}"
     echo -e "${YELLOW}[!] This is usually non-critical, continuing installation...${NC}"
-    # Remove invalid repository references
-    if grep -q "impish-security" /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null; then
-        echo -e "${YELLOW}[!] Attempting to fix invalid repository references...${NC}"
-        sed -i '/impish-security/d' /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null || true
-        echo -e "${GREEN}[+] Removed invalid repository references${NC}"
+    # Check if error is just about invalid repos
+    if ! grep -q "404.*Not Found" /tmp/apt_update.log 2>/dev/null; then
+        echo -e "${RED}[!] Critical error in apt-get update, please check manually${NC}"
+        exit 1
     fi
-fi
+}
 
 echo -e "${GREEN}[*] Installing packages...${NC}"
 apt-get install -y \
