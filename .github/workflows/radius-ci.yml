@@ -17,6 +17,11 @@ jobs:
           MYSQL_DATABASE: radius
         ports:
           - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,8 +34,7 @@ jobs:
       - name: Wait for DB
         run: |
           for i in {1..60}; do
-            mysql -h 127.0.0.1 -uroot -proot -e "SELECT 1" && break
-            sleep 2
+            mysql -h 127.0.0.1 -uroot -proot -e "SELECT 1" && break || sleep 2
           done
 
       - name: Create radius user and grant
@@ -44,14 +48,33 @@ jobs:
 
       - name: Apply repo configs
         run: |
-          sudo cp -a configs/sql /etc/freeradius/3.0/mods-available/sql
-          sudo sed -i "s/^#\s*server = .*/server = \"127.0.0.1\"/" /etc/freeradius/3.0/mods-available/sql
-          sudo sed -i "s/^#\s*port = .*/port = 3306/" /etc/freeradius/3.0/mods-available/sql
-          sudo sed -i "s/^#\s*login = .*/login = \"radius\"/" /etc/freeradius/3.0/mods-available/sql
-          sudo sed -i "s/^#\s*password = .*/password = \"radius\"/" /etc/freeradius/3.0/mods-available/sql
+          # Copy SQL config - gunakan configs/sql (file yang ada)
+          sudo cp configs/sql /etc/freeradius/3.0/mods-available/sql
+          
+          # Update config dengan sed - pastikan format benar
+          sudo sed -i 's|^server = .*|server = "127.0.0.1"|' /etc/freeradius/3.0/mods-available/sql
+          sudo sed -i 's|^port = .*|port = 3306|' /etc/freeradius/3.0/mods-available/sql
+          sudo sed -i 's|^login = .*|login = "radius"|' /etc/freeradius/3.0/mods-available/sql
+          sudo sed -i 's|^password = .*|password = "radius"|' /etc/freeradius/3.0/mods-available/sql
+          sudo sed -i 's|^radius_db = .*|radius_db = "radius"|' /etc/freeradius/3.0/mods-available/sql
+          
+          # Enable SQL module
           sudo ln -sf /etc/freeradius/3.0/mods-available/sql /etc/freeradius/3.0/mods-enabled/sql
-          sudo cp -a configs/sites-default /etc/freeradius/3.0/sites-available/default
+          
+          # Copy sites-default if exists
+          if [ -f configs/sites-default ]; then
+            sudo cp configs/sites-default /etc/freeradius/3.0/sites-available/default
+          fi
+          
+          # Set permissions
+          sudo chown -R freerad:freerad /etc/freeradius/3.0
 
       - name: Verify configuration parses and DB connectivity
         run: |
-          sudo freeradius -Cx -lstdout
+          # Test FreeRADIUS configuration
+          sudo freeradius -C || {
+            echo "Configuration test failed!"
+            sudo freeradius -XC 2>&1 | head -50
+            exit 1
+          }
+          echo "✅ FreeRADIUS configuration is valid!"
