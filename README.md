@@ -40,11 +40,30 @@ Paket instalasi FreeRADIUS + MariaDB untuk integrasi Mikrotik dan billing server
 ### Instalasi Cepat (Development/Testing)
 
 ```bash
-# Clone repository
-git clone https://github.com/yourrepo/FreeRADIUSPaket.git
+# Clone repository (pertama kali)
+git clone https://github.com/enosrotua/FreeRADIUSPaket.git
 cd FreeRADIUSPaket
 
-# Run instalasi (akan generate password otomatis)
+# Auto-setup (detect dan install jika belum ada)
+sudo bash setup.sh
+```
+
+**Workflow Update:**
+```bash
+# Setelah git pull (untuk update)
+git pull origin main
+sudo bash setup.sh  # Auto-detect dan install jika perlu
+```
+
+Script `setup.sh` akan otomatis:
+- ✅ Detect apakah FreeRADIUS sudah terinstall
+- ✅ Check apakah config directory ada
+- ✅ Install jika belum ada atau perlu update
+- ✅ Skip jika sudah lengkap
+
+**Manual Install (jika perlu):**
+```bash
+# Run instalasi manual (akan generate password otomatis)
 sudo bash scripts/install_freeradius.sh
 ```
 
