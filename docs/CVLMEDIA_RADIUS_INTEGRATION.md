@@ -28,6 +28,17 @@ Billing Database Configuration:
 
 **⚠️ SIMPAN PASSWORD INI!**
 
+### Update Permission untuk User yang Sudah Ada
+
+Jika user `billing` sudah dibuat sebelumnya dan perlu ditambahkan permission untuk `radreply` (untuk menyimpan comment voucher):
+
+```bash
+cd /home/enos/FreeRADIUSPaket
+sudo bash scripts/update_billing_permissions.sh
+```
+
+Script ini akan menambahkan permission `INSERT, UPDATE, DELETE` pada tabel `radreply` tanpa perlu recreate user.
+
 ### Atau Manual:
 
 ```bash
