@@ -46,7 +46,7 @@ fi
 
 echo -e "${GREEN}[*] Updating permissions for user '${BILLING_DB_USER}'@'${GRANT_HOST}'...${NC}"
 echo -e "  Database: ${RADIUS_DB_NAME}"
-echo -e "  Adding: INSERT, UPDATE, DELETE on radreply table"
+echo -e "  Adding: INSERT, UPDATE, DELETE on radreply, radgroupreply, radgroupcheck tables"
 
 # Update permissions
 mysql -u root -p"${MARIADB_ROOT_PASSWORD}" <<EOF
@@ -56,8 +56,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON ${RADIUS_DB_NAME}.radreply TO '${BILLING
 -- Ensure all other permissions are still there
 GRANT SELECT, INSERT, UPDATE, DELETE ON ${RADIUS_DB_NAME}.radcheck TO '${BILLING_DB_USER}'@'${GRANT_HOST}';
 GRANT SELECT, INSERT, UPDATE, DELETE ON ${RADIUS_DB_NAME}.radusergroup TO '${BILLING_DB_USER}'@'${GRANT_HOST}';
-GRANT SELECT, INSERT, UPDATE ON ${RADIUS_DB_NAME}.radgroupreply TO '${BILLING_DB_USER}'@'${GRANT_HOST}';
-GRANT SELECT, INSERT, UPDATE ON ${RADIUS_DB_NAME}.radgroupcheck TO '${BILLING_DB_USER}'@'${GRANT_HOST}';
+GRANT SELECT, INSERT, UPDATE, DELETE ON ${RADIUS_DB_NAME}.radgroupreply TO '${BILLING_DB_USER}'@'${GRANT_HOST}';
+GRANT SELECT, INSERT, UPDATE, DELETE ON ${RADIUS_DB_NAME}.radgroupcheck TO '${BILLING_DB_USER}'@'${GRANT_HOST}';
 GRANT SELECT ON ${RADIUS_DB_NAME}.radacct TO '${BILLING_DB_USER}'@'${GRANT_HOST}';
 GRANT SELECT ON ${RADIUS_DB_NAME}.radpostauth TO '${BILLING_DB_USER}'@'${GRANT_HOST}';
 
@@ -77,8 +77,8 @@ if [[ $? -eq 0 ]]; then
     echo -e "  ✓ SELECT, INSERT, UPDATE, DELETE on radcheck"
     echo -e "  ✓ SELECT, INSERT, UPDATE, DELETE on radusergroup"
     echo -e "  ✓ SELECT, INSERT, UPDATE, DELETE on radreply"
-    echo -e "  ✓ SELECT, INSERT, UPDATE on radgroupreply"
-    echo -e "  ✓ SELECT, INSERT, UPDATE on radgroupcheck"
+    echo -e "  ✓ SELECT, INSERT, UPDATE, DELETE on radgroupreply"
+    echo -e "  ✓ SELECT, INSERT, UPDATE, DELETE on radgroupcheck"
     echo -e "  ✓ SELECT on radacct"
     echo -e "  ✓ SELECT on radpostauth"
     echo ""
