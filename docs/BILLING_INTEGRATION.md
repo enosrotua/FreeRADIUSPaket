@@ -54,9 +54,11 @@ CREATE USER 'billing'@'10.0.0.5' IDENTIFIED BY 'your_secure_password_here';
 -- Grant privileges yang diperlukan
 GRANT SELECT, INSERT, UPDATE, DELETE ON radius.radcheck TO 'billing'@'localhost';
 GRANT SELECT, INSERT, UPDATE, DELETE ON radius.radusergroup TO 'billing'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON radius.radreply TO 'billing'@'localhost';
 GRANT SELECT, INSERT, UPDATE ON radius.radgroupreply TO 'billing'@'localhost';
 GRANT SELECT, INSERT, UPDATE ON radius.radgroupcheck TO 'billing'@'localhost';
 GRANT SELECT ON radius.radacct TO 'billing'@'localhost'; -- Untuk reporting
+GRANT SELECT ON radius.radpostauth TO 'billing'@'localhost'; -- Untuk logging
 
 FLUSH PRIVILEGES;
 ```
