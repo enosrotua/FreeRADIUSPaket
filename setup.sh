@@ -58,11 +58,12 @@ if [ "$NEEDS_INSTALL" = false ]; then
         echo ""
         echo -e "${GREEN}✅ FreeRADIUS is ready!${NC}"
         echo ""
-        echo "Next steps:"
-        echo "  1. Setup billing user: sudo bash scripts/setup_billing_user.sh"
-        echo "  2. Configure Mikrotik clients: see docs/MIKROTIK_RADIUS_SETUP.md"
-        echo "  3. Setup firewall: sudo bash scripts/setup_firewall.sh"
-        exit 0
+    echo "Next steps:"
+    echo "  1. Setup billing user: sudo bash scripts/setup_billing_user.sh"
+    echo "  2. Setup billing application: bash scripts/setup_billing.sh"
+    echo "  3. Configure Mikrotik clients: see docs/MIKROTIK_RADIUS_SETUP.md"
+    echo "  4. Setup firewall: sudo bash scripts/setup_firewall.sh"
+    exit 0
     else
         echo -e "${YELLOW}[!] Database connection failed, may need reconfiguration${NC}"
         NEEDS_INSTALL=true
@@ -83,7 +84,8 @@ if [ "$NEEDS_INSTALL" = true ]; then
     echo ""
     echo "Next steps:"
     echo "  1. Setup billing user: sudo bash scripts/setup_billing_user.sh"
-    echo "  2. Configure Mikrotik clients: see docs/MIKROTIK_RADIUS_SETUP.md"
-    echo "  3. Setup firewall: sudo bash scripts/setup_firewall.sh"
+    echo "  2. Setup billing application: bash scripts/setup_billing.sh"
+    echo "  3. Configure Mikrotik clients: see docs/MIKROTIK_RADIUS_SETUP.md"
+    echo "  4. Setup firewall: sudo bash scripts/setup_firewall.sh"
 fi
 
