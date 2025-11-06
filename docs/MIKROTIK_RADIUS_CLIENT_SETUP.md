@@ -96,12 +96,15 @@ sudo ufw allow 1813/udp
 
 ### Step 6: Test Connectivity
 
-**Dari Mikrotik, test koneksi ke RADIUS server:**
-```
-/radius test <radius-server-name> user=rt password=rt
-```
+**Catatan:** Command `/radius test` tidak tersedia di semua versi RouterOS. Gunakan cara lain untuk test.
 
-**Expected:** `Access-Accept` jika user dan password benar.
+**Alternatif test dari Mikrotik:**
+1. Coba login dari hotspot client
+2. Monitor log FreeRADIUS untuk melihat apakah request sampai
+3. Atau gunakan `/ping` untuk test connectivity:
+   ```
+   /ping 103.19.57.68
+   ```
 
 **Atau test ping:**
 ```
