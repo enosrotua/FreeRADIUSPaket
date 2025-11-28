@@ -14,9 +14,9 @@ NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║   FreeRADIUS Paket - Auto Setup      ║${NC}"
-echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
+echo -e "${GREEN}╔══════════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║   FreeRADIUS Paket - Auto Setup Cvlmedia By Enos Rotua   ║${NC}"
+echo -e "${GREEN}╚══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
 # Check if running as root
@@ -55,6 +55,20 @@ if [ "$NEEDS_INSTALL" = false ]; then
     echo -e "${GREEN}[*] Verifying database connection...${NC}"
     if mysql -u radius -pradius -e "USE radius;" &>/dev/null 2>&1; then
         echo -e "${GREEN}[+] Database connection OK${NC}"
+        
+        # Apply configuration fixes (idempotent - safe to run multiple times)
+        echo -e "${GREEN}[*] Menerapkan perbaikan konfigurasi (jika diperlukan)...${NC}"
+        FIX_SCRIPT="${SCRIPT_DIR}/scripts/fix-freeradius-config.sh"
+        if [[ -f "$FIX_SCRIPT" ]]; then
+            if bash "$FIX_SCRIPT" 2>/dev/null; then
+                echo -e "${GREEN}[+] Konfigurasi sudah diperiksa dan diperbaiki${NC}"
+            else
+                echo -e "${YELLOW}[!] Perbaikan konfigurasi gagal, tetapi tidak kritis${NC}"
+            fi
+        else
+            echo -e "${YELLOW}[!] Fix script tidak ditemukan: $FIX_SCRIPT${NC}"
+        fi
+        
         echo ""
         echo -e "${GREEN}✅ FreeRADIUS is ready!${NC}"
         echo ""
